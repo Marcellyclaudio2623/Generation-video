@@ -1,0 +1,10 @@
+video-agent/takes/
+video-agent/edits/**/*.mp4
+video-agent/edits/**/assets/
+video-agent/edits/**/stills/
+.claude/skills/short-editing/.runtime/
+.claude/skills/short-editing/engine/node_modules/
+.claude/skills/short-editing/assets/music/*.mp3
+.claude/skills/short-editing/assets/icons/*.png
+video-agent/.tmp/
+video-agent/.env
