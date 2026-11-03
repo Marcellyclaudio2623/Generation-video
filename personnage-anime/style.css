@@ -72,17 +72,30 @@ body {
   stroke-linejoin: round;
 }
 
-/* Yeux */
-#perso .eye-white   { fill: #ebe2da; }
-#perso .lid-shadow  { fill: none; stroke: #8a766a; stroke-width: 10; opacity: .55; }
-#perso .lid-line    { fill: none; stroke: #0c0806; stroke-width: 4.6; stroke-linecap: round; stroke-linejoin: round; }
-#perso .lower-lid   { fill: none; stroke: #5b3324; stroke-width: 1.8; stroke-linecap: round; opacity: .75; }
-#perso .crease      { fill: none; stroke: #7e4329; stroke-width: 2; stroke-linecap: round; opacity: .5; }
-#perso .lash        { fill: none; stroke: #0c0806; stroke-width: 3; stroke-linecap: round; }
+/* Yeux — les variables CSS servent à la copie « vue à travers le verre » (.ghost) */
+#perso .eye-white   { fill: var(--eye-white, #ebe2da); }
+#perso .iris-disc   { fill: var(--iris, url(#irisGrad)); stroke: #070403; stroke-width: 2; }
+#perso .pupil       { fill: #030201; }
+#perso .glint-big   { fill: #f6f6f6; opacity: .95; }
+#perso .glint-small { fill: #fff; opacity: .7; }
+#perso .lid-shadow  { fill: none; stroke: var(--lid-shadow, #8a766a); stroke-width: 10; opacity: var(--lid-shadow-op, .5); }
+#perso .lid-line    { fill: none; stroke: #070504; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+#perso .lower-lid   { fill: none; stroke: var(--lower, #5b3324); stroke-width: 2; stroke-linecap: round; opacity: .8; }
+#perso .crease      { fill: none; stroke: var(--crease, #7e4329); stroke-width: 2.2; stroke-linecap: round; opacity: var(--crease-op, .55); }
+#perso .bag         { fill: none; stroke: var(--bag, #8a4a30); stroke-width: 2; stroke-linecap: round; opacity: var(--bag-op, .35); }
+#perso .lash        { fill: none; stroke: #070504; stroke-width: 3.4; stroke-linecap: round; }
+#perso .ghost {
+  --eye-white: #505053;
+  --iris: #0b0908;
+  --lid-shadow: #1c1c1e; --lid-shadow-op: .55;
+  --lower: #050505;
+  --crease: #000; --crease-op: .8;
+  --bag: #000; --bag-op: .55;
+}
 
 /* Bouche */
-#perso .fold   { fill: none; stroke: #8e4a2c; stroke-width: 2.2; stroke-linecap: round; }
-#perso .dimple { fill: none; stroke: #6e3624; stroke-width: 2; stroke-linecap: round; opacity: .55; }
+#perso .fold   { fill: none; stroke: #8e4a2c; stroke-width: 2; stroke-linecap: round; }
+#perso .corner { fill: #1e0d08; }
 
 /* Branches de lunettes */
 #perso .arm .arm-body { fill: none; stroke: #121212; stroke-width: 9; stroke-linecap: round; }
