@@ -25,8 +25,8 @@
              ========================================================= -->
         <!-- visage : tempes 280/720, mâchoire 308/692 à y=694, menton y=846 -->
         <path id="facePath" d="M 500 238 C 612 238 700 254 712 330 C 721 400 722 470 720 540 C 717 600 707 652 692 694 C 682 728 666 758 640 790 C 606 824 560 845 500 846 C 440 845 394 824 360 790 C 334 758 318 728 308 694 C 293 652 283 600 280 540 C 278 470 279 400 288 330 C 300 254 388 238 500 238 Z"/>
-        <!-- crâne (côtés de la tête, visibles quand elle tourne) -->
-        <path id="headBasePath" d="M 300 296 C 380 278 620 278 700 296 C 724 340 730 400 728 460 C 726 540 720 600 700 660 C 690 690 670 712 640 722 L 360 722 C 330 712 310 690 300 660 C 280 600 274 540 272 460 C 270 400 276 340 300 296 Z"/>
+        <!-- crâne (côtés de la tête et arrière de la mâchoire, visibles quand elle tourne) -->
+        <path id="headBasePath" d="M 300 296 C 380 278 620 278 700 296 C 724 340 730 400 728 460 C 727 495 721 522 714.5 540.5 C 711.6 599 701.8 649.7 687.2 690.7 C 677.5 723.8 661.9 753.1 636.5 784.3 C 603.4 817.4 558.5 837.9 500 838.9 C 441.5 837.9 396.6 817.4 363.5 784.3 C 338.1 753.1 322.5 723.8 312.8 690.7 C 298.2 649.7 288.4 599 285.5 540.5 C 279 522 273 495 272 460 C 270 400 276 340 300 296 Z"/>
         <!-- limite intérieure de la barbe (la barbe = visage moins cette forme) -->
         <path id="beardInnerPath" d="M 290 592 C 304 664 342 724 390 760 C 428 786 466 797 500 797 C 534 797 572 786 610 760 C 658 724 696 664 710 592 L 710 300 L 290 300 Z"/>
         <path id="neckPath" d="M 340 700 C 340 760 338 820 336 860 C 390 905 445 950 500 994 C 555 950 610 905 664 860 C 662 820 660 760 660 700 Z"/>
@@ -35,7 +35,8 @@
 
         <!-- Oreille gauche (la droite est son miroir) -->
         <g id="ear">
-          <path d="M 296 480 C 270 456 230 462 220 500 C 211 540 222 590 240 615 C 255 637 276 650 298 642 Z" fill="#cd845e" stroke="#0b0b0b" stroke-width="4.5" stroke-linejoin="round"/>
+          <path d="M 314 478 L 296 480 C 270 456 230 462 220 500 C 211 540 222 590 240 615 C 255 637 276 650 298 642 L 314 640 Z" fill="#cd845e"/>
+          <path d="M 296 480 C 270 456 230 462 220 500 C 211 540 222 590 240 615 C 255 637 276 650 298 642" fill="none" stroke="#0b0b0b" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M 286 502 C 266 492 248 503 249 530 C 250 560 260 586 278 600 C 285 584 287 558 285 540 Z" fill="#8f4a35" opacity=".72"/>
           <path d="M 286 502 C 266 492 248 503 249 530 C 250 560 260 586 278 600 C 285 584 287 558 285 540 Z" fill="url(#dotsDark)" opacity=".2"/>
           <path d="M 229 505 C 233 486 250 476 270 479" fill="none" stroke="#f0b693" stroke-width="3.6" stroke-linecap="round" opacity=".8"/>
@@ -219,7 +220,10 @@
           <!-- contour unifié crâne + visage (traits d'abord, remplissages ensuite) -->
           <use href="#headBasePath" class="outline" data-z="-20"/>
           <use href="#facePath" class="outline" data-z="40"/>
-          <use href="#headBasePath" fill="url(#headSideGrad)" data-z="-20"/>
+          <g data-z="-20">
+            <use href="#headBasePath" fill="url(#headSideGrad)"/>
+            <image id="sideTex" preserveAspectRatio="none"/>
+          </g>
 
           <!-- visage -->
           <g id="faceLayer" data-z="40">
@@ -269,6 +273,7 @@
               <!-- assombrissement du bas de la mâchoire -->
               <path d="M 310 740 C 366 820 440 846 500 846 C 560 846 634 820 690 740 L 700 870 L 300 870 Z" fill="#8c4a30" opacity=".22"/>
               <image id="stubbleTex" preserveAspectRatio="none"/>
+              <use href="#facePath" fill="none" stroke="#7a3f27" stroke-width="2.4" opacity=".35"/>
             </g>
           </g>
 

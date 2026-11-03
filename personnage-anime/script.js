@@ -335,6 +335,43 @@
     ctx.restore();
   }));
 
+  /* Côté de la tête (visible en 3/4) : pointillé du dégradé près des tempes + barbe le long de la mâchoire */
+  const headBase2D = new Path2D($('#headBasePath').getAttribute('d'));
+  const sideBox = { x: 268, y: 380, w: 464, h: 462 };
+  placeImage('#sideTex', sideBox, paint(sideBox, (ctx) => {
+    ctx.save();
+    ctx.clip(headBase2D);
+    const r = rng(121);
+    const outward = (x, y) => Math.atan2(y - 560, x - 500);
+    const nearEdge = (x, y, d) => {
+      const a = outward(x, y);
+      return !inside(headBase2D, x + Math.cos(a) * d, y + Math.sin(a) * d);
+    };
+    // pointillé du dégradé (tempes → oreilles)
+    for (let i = 0; i < 2600; i++) {
+      const x = sideBox.x + r() * sideBox.w, y = 385 + r() * 150;
+      if (!nearEdge(x, y, 30) || r() > 1 - (y - 385) / 160) continue;
+      ctx.fillStyle = `rgba(16,11,8,${(0.4 + r() * 0.45).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(x, y, 0.6 + r() * 0.9, 0, TAU); ctx.fill();
+    }
+    // teinte + hachures de barbe le long de la mâchoire (même rendu que sur le visage)
+    ctx.fillStyle = 'rgba(60,30,18,.16)';
+    for (let y = 590; y < 842; y += 5) {
+      for (let x = 270; x < 732; x += 5) {
+        const xx = x + ((y / 5) % 2) * 2.5;
+        if (!nearEdge(xx, y, 34)) continue;
+        ctx.beginPath(); ctx.arc(xx, y, 0.95, 0, TAU); ctx.fill();
+      }
+    }
+    ctx.lineCap = 'round';
+    hairs(ctx, r, 1300, { x: 268, y: 585, w: 464, h: 257 },
+      (x, y) => inside(headBase2D, x, y) && nearEdge(x, y, 34),
+      outward, 6, 6,
+      (x, y, rr) => clamp((y - 590) / 50, 0, 1) * (nearEdge(x, y, 14) ? 0.6 + rr() * 0.35 : 0.2 + rr() * 0.3),
+      0.7, 0.45);
+    ctx.restore();
+  }));
+
   /* Moustache fine (hachures vers le bas et l'extérieur) + liaisons vers le menton */
   const mustacheBox = { x: 380, y: 646, w: 240, h: 112 };
   const mustachePath = new Path2D('M 404 692 C 420 670 450 656 500 652 C 550 656 580 670 596 692 C 580 684 552 674 518 668 L 500 671 L 482 668 C 448 674 420 684 404 692 Z');
@@ -790,7 +827,7 @@
     const sy = Math.sin(yaw);
     const sL = clamp(sy > 0 ? 1 + 0.6 * sy : 1 + 1.7 * sy, 0.06, 1.4);
     const sR = clamp(sy < 0 ? 1 - 0.6 * sy : 1 - 1.7 * sy, 0.06, 1.4);
-    const mEar = layer(-60, yaw, pitch);
+    const mEar = layer(-20, yaw, pitch);       // même profondeur que le crâne : l'oreille reste attachée
     el.earL.setAttribute('transform', `${mstr(mEar)} translate(296 0) scale(${f(sL)} 1) translate(-296 0)`);
     el.earR.setAttribute('transform', `${mstr(mEar)} translate(704 0) scale(${f(sR)} 1) translate(-704 0)`);
 
