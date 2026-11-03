@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personnage animé</title>
+  <meta name="description" content="Personnage animé dessiné en SVG, stylé en CSS et animé en JavaScript : regard qui suit le curseur, clignements, expressions, lunettes, parole.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+
+  <!-- ==================== SCÈNE ==================== -->
+  <section class="stage" id="stage" aria-label="Personnage animé">
+    <svg id="perso" viewBox="0 0 1000 1000" role="img" aria-labelledby="persoTitle">
+      <title id="persoTitle">Homme aux cheveux bouclés, lunettes de soleil noires, barbe courte et chemise noire</title>
+
+      <defs>
+        <!-- ---------- Formes de référence (réutilisées) ---------- -->
+        <path id="facePath" d="M 500 236 C 612 236 698 252 712 330 C 722 400 724 470 721 540 C 718 610 706 680 676 748 C 642 812 578 842 500 844 C 422 842 358 812 324 748 C 294 680 282 610 279 540 C 276 470 278 400 288 330 C 302 252 388 236 500 236 Z"/>
+        <path id="headBasePath" d="M 300 296 C 380 278 620 278 700 296 C 724 340 730 400 728 460 C 726 540 720 600 700 660 C 690 690 670 712 640 722 L 360 722 C 330 712 310 690 300 660 C 280 600 274 540 272 460 C 270 400 276 340 300 296 Z"/>
+        <path id="beardInnerPath" d="M 292 585 C 304 656 346 710 398 742 C 436 766 468 776 500 776 C 532 776 564 766 602 742 C 654 710 696 656 708 585 L 708 300 L 292 300 Z"/>
+        <path id="neckPath" d="M 340 680 C 344 740 338 800 322 850 C 380 900 440 950 500 994 C 560 950 620 900 678 850 C 662 800 656 740 660 680 Z"/>
+        <path id="lensOuterL" d="M 280 437 C 280 430 286 427 297 427 L 463 427 C 475 427 481 433 480 444 L 472 530 C 468 557 452 568 424 568 L 340 568 C 312 568 298 557 294 532 L 284 462 C 282 452 280 444 280 437 Z"/>
+        <path id="lensInnerL" d="M 299 449 C 299 444 303 442 309 442 L 456 442 C 462 442 465 446 464 452 L 457 525 C 454 545 444 554 423 554 L 342 554 C 322 554 313 546 310 528 L 301 466 Z"/>
+
+        <!-- Oreille gauche (la droite est son miroir) -->
+        <g id="ear">
+          <path d="M 296 474 C 268 450 226 456 216 496 C 207 538 219 590 237 617 C 253 641 277 657 300 648 Z" fill="#c97f5a" stroke="#0b0b0b" stroke-width="4.5" stroke-linejoin="round"/>
+          <path d="M 286 498 C 264 486 244 498 245 527 C 246 560 258 588 277 604 C 284 588 286 560 284 540 Z" fill="#94503a" opacity=".7"/>
+          <path d="M 292 484 C 266 468 236 476 231 507 C 227 541 238 580 257 606" fill="none" stroke="#3a1d12" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 271 512 C 257 520 256 548 266 566 C 272 578 282 584 291 578" fill="none" stroke="#5a2e1d" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M 226 502 C 230 482 248 471 268 473" fill="none" stroke="#efb894" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+          <ellipse cx="256" cy="626" rx="10" ry="7" fill="#e8ad88" opacity=".6"/>
+        </g>
+
+        <!-- Demi-monture gauche (la droite est son miroir) -->
+        <g id="frameHalf">
+          <path d="M 282 432 L 257 437 C 250 439 249 448 255 451 L 286 461 Z" fill="#111" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M 280 437 C 280 430 286 427 297 427 L 463 427 C 475 427 481 433 480 444 L 472 530 C 468 557 452 568 424 568 L 340 568 C 312 568 298 557 294 532 L 284 462 C 282 452 280 444 280 437 Z M 299 449 C 299 444 303 442 309 442 L 456 442 C 462 442 465 446 464 452 L 457 525 C 454 545 444 554 423 554 L 342 554 C 322 554 313 546 310 528 L 301 466 Z"
+                fill="#121212" fill-rule="evenodd" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M 302 432 L 458 432" stroke="#4d4d4d" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M 336 562 C 360 564 400 564 426 562" stroke="#3a3a3a" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M 474 446 L 467 524" stroke="#2f2f2f" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="292" cy="435" r="2.8" fill="#cfcfcf" stroke="#2a2a2a" stroke-width=".8"/>
+          <circle cx="302" cy="435" r="2.8" fill="#cfcfcf" stroke="#2a2a2a" stroke-width=".8"/>
+        </g>
+
+        <!-- ---------- Trames (halftone, style BD) ---------- -->
+        <pattern id="dotsLight" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.5" fill="#fff"/></pattern>
+        <pattern id="dotsDark" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r="1.7" fill="#000"/></pattern>
+        <pattern id="bgDots" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="5" cy="5" r="1.7" fill="#000"/></pattern>
+        <pattern id="bgBigDots" width="110" height="110" patternUnits="userSpaceOnUse"><circle cx="55" cy="55" r="4.5" fill="#18181a"/></pattern>
+
+        <!-- ---------- Dégradés ---------- -->
+        <radialGradient id="bgGrad" cx="500" cy="430" r="720" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#3b3b3d"/><stop offset=".55" stop-color="#2b2b2d"/><stop offset="1" stop-color="#18181a"/>
+        </radialGradient>
+        <radialGradient id="bgDotsFade" cx="500" cy="460" r="720" gradientUnits="userSpaceOnUse">
+          <stop offset=".3" stop-color="#000"/><stop offset="1" stop-color="#fff"/>
+        </radialGradient>
+        <radialGradient id="rimGlow" cx="500" cy="400" r="420" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="skinGrad" cx="470" cy="470" r="340" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#e2a27e"/><stop offset=".6" stop-color="#d48a64"/><stop offset="1" stop-color="#bf754f"/>
+        </radialGradient>
+        <linearGradient id="headSideGrad" x1="0" y1="290" x2="0" y2="720" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#b56c49"/><stop offset="1" stop-color="#a65e3e"/>
+        </linearGradient>
+        <linearGradient id="neckGrad" x1="0" y1="680" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#7c4128"/><stop offset=".4" stop-color="#a9623f"/><stop offset="1" stop-color="#c97f5a"/>
+        </linearGradient>
+        <linearGradient id="shirtGrad" x1="0" y1="820" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#1f1f21"/><stop offset="1" stop-color="#0c0c0d"/>
+        </linearGradient>
+        <linearGradient id="lensGrad" x1="0" y1="440" x2="0" y2="556" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#0f0806" stop-opacity=".94"/><stop offset="1" stop-color="#2b1a12" stop-opacity=".8"/>
+        </linearGradient>
+        <radialGradient id="irisGrad" cx=".45" cy=".4" r=".6">
+          <stop offset="0" stop-color="#5a3824"/><stop offset=".7" stop-color="#2d1a10"/><stop offset="1" stop-color="#0d0705"/>
+        </radialGradient>
+        <!-- Masques de dégradé (fondu des cheveux sur les côtés) -->
+        <linearGradient id="hairFadeGrad" x1="0" y1="0" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+          <stop offset=".345" stop-color="#fff"/><stop offset=".40" stop-color="#9a9a9a"/><stop offset=".46" stop-color="#3a3a3a"/><stop offset=".52" stop-color="#000"/>
+        </linearGradient>
+        <linearGradient id="stippleFadeGrad" x1="0" y1="0" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+          <stop offset=".30" stop-color="#fff"/><stop offset=".45" stop-color="#8a8a8a"/><stop offset=".545" stop-color="#000"/>
+        </linearGradient>
+        <mask id="bgDotsMask"><rect width="1000" height="1000" fill="url(#bgDotsFade)"/></mask>
+        <mask id="hairMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000"><rect width="1000" height="1000" fill="url(#hairFadeGrad)"/></mask>
+        <mask id="stippleMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="1000"><rect width="1000" height="1000" fill="url(#stippleFadeGrad)"/></mask>
+
+        <!-- ---------- Découpes ---------- -->
+        <clipPath id="faceClip"><use href="#facePath"/></clipPath>
+        <clipPath id="neckClip"><use href="#neckPath"/></clipPath>
+        <clipPath id="lensClipL"><use href="#lensInnerL"/></clipPath>
+        <clipPath id="lensClipR"><use href="#lensInnerL" transform="matrix(-1 0 0 1 1000 0)"/></clipPath>
+        <clipPath id="eyeClipL"><path id="eyeClipPathL"/></clipPath>
+        <clipPath id="eyeClipR"><path id="eyeClipPathR"/></clipPath>
+        <clipPath id="mouthClip"><path id="mouthClipPath"/></clipPath>
+      </defs>
+
+      <!-- ==================== DÉCOR ==================== -->
+      <g id="background">
+        <rect width="1000" height="1000" fill="url(#bgGrad)"/>
+        <rect width="1000" height="1000" fill="url(#bgDots)" mask="url(#bgDotsMask)" opacity=".55"/>
+        <rect width="1000" height="1000" fill="url(#bgBigDots)"/>
+        <circle cx="500" cy="400" r="420" fill="url(#rimGlow)"/>
+      </g>
+
+      <g id="character">
+        <!-- ==================== CORPS ==================== -->
+        <g id="body">
+          <path d="M 266 814 C 300 772 360 758 500 758 C 640 758 700 772 734 814 L 726 862 L 274 862 Z" fill="#151517" stroke="#060606" stroke-width="4" stroke-linejoin="round"/>
+          <use href="#neckPath" fill="url(#neckGrad)" stroke="#0b0b0b" stroke-width="4" stroke-linejoin="round"/>
+          <g clip-path="url(#neckClip)">
+            <path id="jawShadow" d="M 300 640 L 700 640 L 700 700 C 640 830 560 890 500 894 C 440 890 360 830 300 700 Z" fill="#6e3720" opacity=".75"/>
+            <path d="M 560 760 C 600 820 640 860 690 860 L 690 1000 L 560 1000 Z" fill="url(#dotsDark)" opacity=".22"/>
+            <path d="M 356 772 C 382 842 418 902 455 956" fill="none" stroke="#7d3f26" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
+            <path d="M 644 772 C 618 842 582 902 545 956" fill="none" stroke="#7d3f26" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>
+          </g>
+          <path d="M -20 1010 L -20 905 C 60 880 150 862 236 842 C 252 838 262 828 270 814 L 320 850 L 500 996 L 680 850 L 730 814 C 738 828 748 838 764 842 C 850 862 940 880 1020 905 L 1020 1010 Z"
+                fill="url(#shirtGrad)" stroke="#060606" stroke-width="4" stroke-linejoin="round"/>
+          <path d="M 18 914 C 90 892 170 872 236 854" fill="none" stroke="#5d5d60" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+          <path d="M 982 914 C 910 892 830 872 764 854" fill="none" stroke="#5d5d60" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+          <path d="M 150 1000 C 170 962 200 928 240 902" fill="none" stroke="#2d2d30" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 850 1000 C 830 962 800 928 760 902" fill="none" stroke="#2d2d30" stroke-width="3" stroke-linecap="round"/>
+          <g id="collarL">
+            <path d="M 272 812 C 292 790 318 780 342 784 C 356 848 416 928 494 998 L 490 1006 L 378 996 C 340 944 302 884 272 842 Z" fill="#1b1b1d" stroke="#050505" stroke-width="3.5" stroke-linejoin="round"/>
+            <path d="M 283 840 C 308 880 344 934 382 986" fill="none" stroke="#56565a" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+            <path d="M 281 808 C 298 793 318 786 336 788" fill="none" stroke="#6a6a6e" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <use href="#collarL" transform="matrix(-1 0 0 1 1000 0)"/>
+        </g>
+
+        <!-- ==================== TÊTE ==================== -->
+        <g id="head">
+          <g id="earL"><use href="#ear"/></g>
+          <g id="earR"><g transform="matrix(-1 0 0 1 1000 0)"><use href="#ear"/></g></g>
+
+          <!-- branches de lunettes côté caché -->
+          <g class="arm" id="armBackL"><path class="arm-body"/><path class="arm-hl"/></g>
+          <g class="arm" id="armBackR"><path class="arm-body"/><path class="arm-hl"/></g>
+
+          <!-- contour unifié crâne + visage (traits d'abord, remplissages ensuite) -->
+          <use href="#headBasePath" class="outline" data-z="-20"/>
+          <use href="#facePath" class="outline" data-z="40"/>
+          <use href="#headBasePath" fill="url(#headSideGrad)" data-z="-20"/>
+
+          <!-- visage -->
+          <g id="faceLayer" data-z="40">
+            <use href="#facePath" fill="url(#skinGrad)"/>
+            <g clip-path="url(#faceClip)">
+              <path d="M 262 300 C 292 360 300 440 300 520 C 300 600 310 670 336 724 C 362 780 410 818 470 846 L 250 870 Z" fill="#b0663f" opacity=".5"/>
+              <path d="M 738 300 C 702 360 690 440 690 520 C 690 600 678 668 652 722 C 624 780 578 818 520 846 L 750 870 Z" fill="#a55c3b" opacity=".6"/>
+              <path d="M 738 300 C 702 360 690 440 690 520 C 690 600 678 668 652 722 C 624 780 578 818 520 846 L 750 870 Z" fill="url(#dotsDark)" opacity=".16"/>
+              <path d="M 290 254 L 710 254 L 710 293 C 600 281 400 281 290 293 Z" fill="#9b5434" opacity=".45"/>
+              <path d="M 338 304 C 372 288 430 288 456 296 C 446 306 418 312 392 322 C 368 331 350 344 340 340 C 332 330 332 314 338 304 Z" fill="#efb995" opacity=".7"/>
+              <path d="M 338 304 C 372 288 430 288 456 296 C 452 320 420 346 384 356 C 356 362 332 338 338 304 Z" fill="url(#dotsLight)" opacity=".22"/>
+              <path d="M 560 298 C 600 290 650 300 668 318 C 660 340 620 346 590 338 C 566 332 552 314 560 298 Z" fill="url(#dotsLight)" opacity=".16"/>
+              <path d="M 300 560 C 330 620 360 650 400 666 C 360 640 330 610 300 560 Z" fill="#a85f3d" opacity=".35"/>
+              <path d="M 700 560 C 670 620 640 650 600 666 C 640 640 670 610 700 560 Z" fill="#a85f3d" opacity=".35"/>
+              <ellipse id="cheekL" cx="350" cy="600" rx="30" ry="12" fill="#eeae88" opacity=".35"/>
+              <ellipse id="cheekR" cx="644" cy="598" rx="38" ry="14" fill="#eeae88" opacity=".4"/>
+              <path d="M 310 752 C 366 826 440 848 500 848 C 560 848 634 826 690 752 L 700 870 L 300 870 Z" fill="#934e31" opacity=".35"/>
+              <image id="stubbleTex" preserveAspectRatio="none"/>
+            </g>
+          </g>
+
+          <!-- cheveux : afro court + dégradé (fade) + contour net -->
+          <g id="hairLayer" data-z="20">
+            <g mask="url(#hairMask)">
+              <path id="hairBase" fill="#151515"/>
+              <image id="hairTex" preserveAspectRatio="none"/>
+              <path id="hairLine" fill="none" stroke="#000" stroke-width="3.6" stroke-linejoin="round"/>
+            </g>
+            <g mask="url(#stippleMask)"><image id="stippleTex" preserveAspectRatio="none"/></g>
+          </g>
+
+          <!-- branches de lunettes côté visible -->
+          <g class="arm" id="armFrontL"><path class="arm-body"/><path class="arm-hl"/></g>
+          <g class="arm" id="armFrontR"><path class="arm-body"/><path class="arm-hl"/></g>
+
+          <!-- yeux (derrière les verres) -->
+          <g id="eyesLayer" data-z="85">
+            <g id="eyeL">
+              <path class="crease" id="creaseL"/>
+              <path class="eye-white" id="whiteL"/>
+              <g clip-path="url(#eyeClipL)">
+                <g id="irisL">
+                  <circle r="22" fill="url(#irisGrad)" stroke="#070403" stroke-width="2"/>
+                  <circle r="9.5" fill="#050302"/>
+                  <circle cx="-8" cy="-8" r="5" fill="#fff" opacity=".95"/>
+                  <circle cx="7" cy="7" r="2.4" fill="#fff" opacity=".6"/>
+                </g>
+                <path class="lid-shadow" id="lidShadowL"/>
+              </g>
+              <path class="lower-lid" id="lowerL"/>
+              <path class="lid-line" id="lidL"/>
+              <path class="lash" id="lashL"/>
+            </g>
+            <g id="eyeR">
+              <path class="crease" id="creaseR"/>
+              <path class="eye-white" id="whiteR"/>
+              <g clip-path="url(#eyeClipR)">
+                <g id="irisR">
+                  <circle r="22" fill="url(#irisGrad)" stroke="#070403" stroke-width="2"/>
+                  <circle r="9.5" fill="#050302"/>
+                  <circle cx="-8" cy="-8" r="5" fill="#fff" opacity=".95"/>
+                  <circle cx="7" cy="7" r="2.4" fill="#fff" opacity=".6"/>
+                </g>
+                <path class="lid-shadow" id="lidShadowR"/>
+              </g>
+              <path class="lower-lid" id="lowerR"/>
+              <path class="lid-line" id="lidR"/>
+              <path class="lash" id="lashR"/>
+            </g>
+          </g>
+
+          <!-- sourcils -->
+          <g id="browsLayer" data-z="95">
+            <g id="browL"><image id="browTexL" preserveAspectRatio="none"/></g>
+            <g id="browR"><g transform="matrix(-1 0 0 1 1000 0)"><image id="browTexR" preserveAspectRatio="none"/></g></g>
+          </g>
+
+          <!-- nez -->
+          <g id="noseLayer" data-z="140">
+            <path d="M 470 556 C 466 576 460 592 450 606 C 460 598 470 594 478 590 Z" fill="#a95f3c" opacity=".45"/>
+            <path d="M 468 548 C 466 570 462 590 456 604" fill="none" stroke="#9a5132" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>
+            <path d="M 532 548 C 536 570 540 590 546 604" fill="none" stroke="#9a5132" stroke-width="2.5" stroke-linecap="round" opacity=".32"/>
+            <path d="M 500 562 C 498 580 497 594 498 603" fill="none" stroke="#f3c3a3" stroke-width="7" stroke-linecap="round" opacity=".6"/>
+            <ellipse cx="500" cy="655" rx="30" ry="6.5" fill="#8f4b2d" opacity=".42"/>
+            <!-- ailes du nez : volume -->
+            <path d="M 462 596 C 440 600 433 628 451 638 C 459 643 468 641 474 636 C 466 624 464 610 462 596 Z" fill="#b8704c" opacity=".75"/>
+            <path d="M 538 596 C 560 600 567 628 549 638 C 541 643 532 641 526 636 C 534 624 536 610 538 596 Z" fill="#a9623f" opacity=".8"/>
+            <!-- dessous du nez -->
+            <path d="M 452 634 C 468 650 532 650 548 634 C 540 646 522 652 500 652 C 478 652 460 646 452 634 Z" fill="#8a4628" opacity=".55"/>
+            <ellipse cx="500" cy="609" rx="15" ry="10" fill="#f4c6a6"/>
+            <circle cx="495" cy="605" r="3.2" fill="#fff2e8" opacity=".85"/>
+            <path d="M 468 637 C 473 627 487 626 494 637 C 487 642 474 642 468 637 Z" fill="#33150c"/>
+            <path d="M 532 637 C 527 627 513 626 506 637 C 513 642 526 642 532 637 Z" fill="#33150c"/>
+            <path d="M 462 597 C 441 601 434 627 451 638 C 457 642 464 641 470 637" fill="none" stroke="#2b140c" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 538 597 C 559 601 566 627 549 638 C 543 642 536 641 530 637" fill="none" stroke="#2b140c" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 487 642 C 495 647 505 647 513 642" fill="none" stroke="#3a1a0f" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M 445 616 C 441 606 445 600 453 598" fill="none" stroke="#efb08c" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+          </g>
+
+          <!-- bouche, moustache, barbiche -->
+          <g id="mouthLayer" data-z="105">
+            <path d="M 493 650 C 491 658 490 666 491 672 M 507 650 C 509 658 510 666 509 672" fill="none" stroke="#a15c3d" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+            <path class="fold" id="foldL"/>
+            <path class="fold" id="foldR"/>
+            <image id="mustacheTex" preserveAspectRatio="none"/>
+            <ellipse id="lipShadow" cx="500" cy="740" rx="32" ry="7" fill="#99512f" opacity=".45"/>
+            <g id="soulPatch"><image id="soulTex" preserveAspectRatio="none"/></g>
+            <path id="mouthInside" fill="#2a0e09"/>
+            <g clip-path="url(#mouthClip)">
+              <ellipse id="tongue" cx="500" cy="720" rx="28" ry="0" fill="#a8463f"/>
+              <path id="teeth" fill="#f1ebe3"/>
+            </g>
+            <path id="upperLip" fill="#9c5444" stroke="#5a291c" stroke-width="1.6" stroke-linejoin="round"/>
+            <path id="upperLipHl" fill="none" stroke="#c98471" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+            <path id="lowerLip" fill="#c97e66" stroke="#5a291c" stroke-width="1.4" stroke-linejoin="round"/>
+            <path id="lowerLipShade" fill="none" stroke="#9e5442" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+            <ellipse id="lipHighlight" cx="500" cy="716" rx="22" ry="4.5" fill="#ecab96" opacity=".8"/>
+            <path id="mouthLine" fill="none" stroke="#2a110b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+            <path class="dimple" id="dimpleL"/>
+            <path class="dimple" id="dimpleR"/>
+          </g>
+
+          <!-- lunettes de soleil -->
+          <g id="glassesLayer" data-z="120">
+            <g id="glassesRig">
+              <path class="lens-shadow" d="M 304 566 C 330 584 430 584 468 560 L 472 574 C 440 598 330 598 300 580 Z" fill="#6f3720" opacity=".32"/>
+              <path class="lens-shadow" d="M 696 566 C 670 584 570 584 532 560 L 528 574 C 560 598 670 598 700 580 Z" fill="#6f3720" opacity=".32"/>
+              <use href="#lensInnerL" fill="url(#lensGrad)"/>
+              <use href="#lensInnerL" fill="url(#lensGrad)" transform="matrix(-1 0 0 1 1000 0)"/>
+              <g clip-path="url(#lensClipL)">
+                <path d="M 312 452 C 340 446 380 446 404 448 L 396 457 C 372 455 340 456 318 463 Z" fill="#fff" opacity=".1"/>
+                <path class="glint" d="M 0 430 L 26 430 L -36 560 L -62 560 Z M 36 430 L 44 430 L -18 560 L -26 560 Z" fill="#fff" opacity=".22"/>
+              </g>
+              <g clip-path="url(#lensClipR)">
+                <path d="M 688 452 C 660 446 620 446 596 448 L 604 457 C 628 455 660 456 682 463 Z" fill="#fff" opacity=".08"/>
+                <path class="glint" d="M 0 430 L 26 430 L -36 560 L -62 560 Z M 36 430 L 44 430 L -18 560 L -26 560 Z" fill="#fff" opacity=".22"/>
+              </g>
+              <use href="#frameHalf"/>
+              <use href="#frameHalf" transform="matrix(-1 0 0 1 1000 0)"/>
+              <path d="M 478 447 C 492 437 508 437 522 447 L 522 464 C 508 455 492 455 478 464 Z" fill="#121212" stroke="#000" stroke-width="2.4" stroke-linejoin="round"/>
+              <path d="M 485 444 C 495 439 505 439 515 444" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+
+    <div class="bubble" id="bubble" aria-live="polite"><span id="bubbleText"></span></div>
+    <p class="hint" id="hint">Bouge le curseur ou ton doigt : il te suit du regard.</p>
+  </section>
+
+  <!-- ==================== COMMANDES ==================== -->
+  <aside class="panel">
+    <header>
+      <h1>Personnage animé</h1>
+      <p class="sub">Dessiné en SVG, stylé en CSS, animé en JavaScript. Aucune image externe.</p>
+    </header>
+
+    <div class="group">
+      <h2>Expressions</h2>
+      <div class="btns" id="exprBtns">
+        <button type="button" data-expr="neutre" aria-pressed="true">Neutre</button>
+        <button type="button" data-expr="sourire" aria-pressed="false">Sourire</button>
+        <button type="button" data-expr="surpris" aria-pressed="false">Surpris</button>
+        <button type="button" data-expr="serieux" aria-pressed="false">Sérieux</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Gestes</h2>
+      <div class="btns">
+        <button type="button" data-act="wink">Clin d'œil</button>
+        <button type="button" data-act="glasses" aria-pressed="false">Relever les lunettes</button>
+        <button type="button" data-act="nod">Oui de la tête</button>
+        <button type="button" data-act="shake">Non de la tête</button>
+        <button type="button" data-act="glint">Reflet</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Angle de vue</h2>
+      <div class="btns" id="poseBtns">
+        <button type="button" data-pose="left">3/4 gauche</button>
+        <button type="button" data-pose="front">Face</button>
+        <button type="button" data-pose="low">Contre-plongée</button>
+        <button type="button" data-pose="right">3/4 droite</button>
+      </div>
+      <label class="switch"><input type="checkbox" id="follow" checked> <span>Suivre le curseur</span></label>
+    </div>
+
+    <div class="group">
+      <h2>Faire parler</h2>
+      <textarea id="sayText" rows="3" maxlength="400">Salut ! Je suis ton personnage animé, codé en HTML, CSS et JavaScript.</textarea>
+      <div class="row">
+        <button type="button" class="primary" id="sayBtn">Parler</button>
+        <button type="button" id="stopBtn">Stop</button>
+        <label class="switch"><input type="checkbox" id="voice" checked> <span>Voix</span></label>
+      </div>
+    </div>
+
+    <p class="keys">Raccourcis : <kbd>S</kbd> sourire · <kbd>W</kbd> clin d'œil · <kbd>L</kbd> lunettes · <kbd>O</kbd> oui · <kbd>N</kbd> non · <kbd>P</kbd> parler</p>
+  </aside>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
