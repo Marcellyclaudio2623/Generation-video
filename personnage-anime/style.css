@@ -83,7 +83,14 @@ body {
 #perso .lower-lid   { fill: none; stroke: var(--lower, #5b3324); stroke-width: 2; stroke-linecap: round; opacity: .8; }
 #perso .crease      { fill: none; stroke: var(--crease, #7e4329); stroke-width: 2.2; stroke-linecap: round; opacity: var(--crease-op, .55); }
 #perso .bag         { fill: none; stroke: var(--bag, #8a4a30); stroke-width: 2; stroke-linecap: round; opacity: var(--bag-op, .35); }
-#perso .lash        { fill: none; stroke: #070504; stroke-width: 3.4; stroke-linecap: round; }
+#perso .lash        { fill: none; stroke: #070504; stroke-width: 2.6; stroke-linecap: round; }
+#perso .caruncle    { fill: var(--caruncle, #d58f80); }
+#perso .waterline   { fill: none; stroke: var(--waterline, #e3ad9c); stroke-width: 4; opacity: .75; }
+#perso .iris-fiber  { fill: none; stroke: var(--fiber, rgba(150, 96, 58, .5)); stroke-width: 1.1; stroke-linecap: round; }
+#perso .iris-light  { fill: var(--iris-light, rgba(150, 92, 52, .65)); }
+#perso .lid-hl      { fill: #eaae8e; opacity: .45; }
+#perso .ghost .lid-hl { display: none; }
+#perso .ghost .lash   { opacity: .45; }
 #perso .ghost {
   --eye-white: #505053;
   --iris: #0b0908;
@@ -91,6 +98,10 @@ body {
   --lower: #050505;
   --crease: #000; --crease-op: .8;
   --bag: #000; --bag-op: .55;
+  --caruncle: #3a3a3c;
+  --waterline: transparent;
+  --fiber: transparent;
+  --iris-light: transparent;
 }
 
 /* Bouche */

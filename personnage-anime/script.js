@@ -189,6 +189,14 @@
         ctx.strokeStyle = `rgba(200,200,204,${(0.35 + 0.6 * s).toFixed(3)})`;
         ctx.lineWidth = 1.5 + s * 1.2;
         ctx.stroke();
+        // point de brillance (éclat blanc) sur les boucles les plus exposées
+        if (s > 0.5 && c.hl < 0.2) {
+          const m = st + c.sw * 0.14;
+          ctx.fillStyle = 'rgba(255,255,255,.9)';
+          ctx.beginPath();
+          ctx.ellipse((c.rx - 0.6) * Math.cos(m), (c.ry - 0.6) * Math.sin(m), 1.9, 1.1, m + Math.PI / 2, 0, TAU);
+          ctx.fill();
+        }
       }
       ctx.restore();
     }
@@ -227,6 +235,44 @@
       ctx.stroke();
     }
     ctx.restore();
+  }));
+
+  /* Mèches qui dépassent du contour (boucles libres + quelques cheveux fins) */
+  const wispBox = { x: 225, y: 80, w: 550, h: 300 };
+  placeImage('#wispTex', wispBox, paint(wispBox, (ctx) => {
+    const r = rng(91);
+    ctx.lineCap = 'round';
+    hair.bumps.forEach((b, i) => {
+      const mx = (b.x0 + b.x1) / 2, my = (b.y0 + b.y1) / 2;
+      if (my > 330 || r() > 0.6) return;
+      const nx = mx - b.cx, ny = my - b.cy, nl = Math.hypot(nx, ny);
+      const ax = b.cx + (nx / nl) * (b.rad + 1), ay = b.cy + (ny / nl) * (b.rad + 1);
+      const tang = Math.atan2(ny, nx) + Math.PI / 2;
+      const s = sheenAt(ax, ay + 20);
+      ctx.save();
+      ctx.translate(ax + (nx / nl) * 2, ay + (ny / nl) * 2);
+      ctx.rotate(tang + (r() - 0.5) * 0.8);
+      const rx = 5 + r() * 2.5, ry = 3.5 + r() * 1.8, a0 = Math.PI * (0.9 + r() * 0.3), sw = 3.2 + r() * 1.2;
+      ctx.beginPath(); ctx.ellipse(0, -ry * 0.4, rx, ry, 0, a0, a0 + sw);
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 5.6; ctx.stroke();
+      ctx.strokeStyle = `rgb(${Math.round(24 + s * 24)},${Math.round(24 + s * 24)},${Math.round(25 + s * 24)})`;
+      ctx.lineWidth = 2.6; ctx.stroke();
+      if (s > 0.35) {
+        ctx.beginPath(); ctx.ellipse(0, -ry * 0.4, rx - 0.4, ry - 0.4, 0, a0 + 0.4, a0 + 1.1);
+        ctx.strokeStyle = `rgba(200,200,204,${(0.3 + 0.5 * s).toFixed(2)})`; ctx.lineWidth = 1.2; ctx.stroke();
+      }
+      ctx.restore();
+      // cheveux fins isolés
+      if (i % 3 === 0) {
+        ctx.strokeStyle = 'rgba(0,0,0,.85)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        const ox = (nx / nl) * 9, oy = (ny / nl) * 9;
+        ctx.bezierCurveTo(ax + ox * 0.4 + 3, ay + oy * 0.4, ax + ox * 0.8 - 3, ay + oy * 0.8, ax + ox, ay + oy);
+        ctx.stroke();
+      }
+    });
   }));
 
   /* Pointillé du dégradé (fade) sur les tempes */
@@ -381,11 +427,14 @@
     mouthLine: $('#mouthLine'), mouthClip: $('#mouthClipPath'), teeth: $('#teeth'), tongue: $('#tongue'),
     lipHighlight: $('#lipHighlight'), lipShadow: $('#lipShadow'), lipShadowDots: $('#lipShadowDots'),
     upperLipHl: $('#upperLipHl'), lowerLipShade: $('#lowerLipShade'), lowerLipLine: $('#lowerLipLine'),
+    lipSpark: $('#lipSpark'), lipCreases: $('#lipCreases'), teethLines: $('#teethLines'),
+    twinkle: $('#twinkle'), motes: $('#motes'),
     cornerL: $('#cornerL'), cornerR: $('#cornerR'),
     foldL: $('#foldL'), foldR: $('#foldR'),
     bubble: $('#bubble'), bubbleText: $('#bubbleText'), hint: $('#hint'),
     follow: $('#follow'), voice: $('#voice'), sayText: $('#sayText'),
   };
+  // (les poussières sont ajoutées plus bas, une fois l'état créé)
   const zLayers = [...document.querySelectorAll('#head [data-z]')].map((n) => ({ n, z: +n.dataset.z }));
   const arms = {
     L: { front: $('#armFrontL'), back: $('#armBackL') },
@@ -404,7 +453,7 @@
     inner: s === 'L' ? [445, 504] : [555, 504],
     clip: $('#eyeClipPath' + s),
     white: both('white' + s), iris: both('iris' + s),
-    lidShadow: both('lidShadow' + s), lid: both('lid' + s), lower: both('lower' + s),
+    lidShadow: both('lidShadow' + s), lid: both('lid' + s), lower: both('lower' + s), water: both('water' + s),
     crease: both('crease' + s), bag: both('bag' + s), lash: both('lash' + s),
   }));
   const setD = (pair, d) => { pair[0].setAttribute('d', d); pair[1].setAttribute('d', d); };
@@ -446,6 +495,33 @@
 
   let now = performance.now() / 1000;
   let last = now;
+  let specX = 0;                  // décalage horizontal des reflets (lumière fixe, tête qui tourne)
+
+  // reflets qui glissent sur les surfaces quand la tête tourne
+  const specs = [...document.querySelectorAll('#perso .spec')].map((n) => ({ n, sx: +n.dataset.sx, sy: +n.dataset.sy }));
+
+  // scintillement (étoile) sur les verres et la monture
+  const twinkle = { next: 3, start: -10, x: 0, y: 0 };
+  const TWINKLE_SPOTS = [[326, 467], [563, 467], [272, 437], [489, 441], [339, 462]];
+
+  // poussières en suspension dans la lumière
+  const motes = [];
+  {
+    const r = rng(101);
+    for (let i = 0; i < 22; i++) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const m = {
+        c, x0: r() * 1000, y0: r() * 1000, v: 6 + r() * 12, amp: 6 + r() * 16,
+        w: 0.2 + r() * 0.5, ph: r() * TAU, rad: 1.2 + r() * 2.6,
+      };
+      c.setAttribute('r', f(m.rad * 2));
+      c.setAttribute('fill', 'url(#mote)');
+      c.setAttribute('opacity', f(0.1 + r() * 0.25));
+      motes.push(m);
+    }
+  }
+
+  for (const m of motes) el.motes.appendChild(m.c);
 
   /* =======================================================
      5. GÉOMÉTRIE DYNAMIQUE (yeux, bouche)
@@ -465,7 +541,15 @@
     const bag = `M ${P(0.52, 30 + bq)} C ${P(0.7, 33 + bq)} ${P(0.86, 28 + bq)} ${P(0.98, 17 + bq)}` +
                 ` M ${P(0.05, 22 + bq)} C ${P(0.14, 28 + bq)} ${P(0.24, 31 + bq)} ${P(0.33, 32 + bq)}`;
     const sgn = dx > 0 ? 1 : -1;
-    const lash = `M ${f(ox + sgn * 4)} ${f(oy)} q ${f(-sgn * 7)} ${f(1.5 + 1.5 * open)} ${f(-sgn * 13)} ${f(4 + 1.5 * open)}`;
+    let lash = `M ${f(ox + sgn * 4)} ${f(oy)} q ${f(-sgn * 7)} ${f(1.5 + 1.5 * open)} ${f(-sgn * 13)} ${f(4 + 1.5 * open)}`;
+    // cils sur la moitié extérieure de la paupière (vers le haut ouvert, vers le bas fermé)
+    const bz = (t, a, b, c, d) => (1 - t) ** 3 * a + 3 * (1 - t) ** 2 * t * b + 3 * (1 - t) * t * t * c + t ** 3 * d;
+    const X = [ox, ox + dx * 0.3, ox + dx * 0.74, ix], Y = [oy, my + uy, my + uy * 0.92, iy];
+    const up = 0.85 * open - 0.35 * (1 - open);
+    for (const [t, len] of [[0.08, 9], [0.17, 8.5], [0.27, 7], [0.38, 5.5]]) {
+      const x = bz(t, ...X), y = bz(t, ...Y);
+      lash += ` M ${f(x)} ${f(y)} q ${f(-sgn * len * 0.3)} ${f(-len * 0.6 * up)} ${f(-sgn * len * 0.75)} ${f(-len * up + 0.5)}`;
+    }
     return { shape, upper, lower, crease, bag, lash, cx: (ox + ix) / 2, cy: my };
   }
 
@@ -479,6 +563,7 @@
       setD(e.lidShadow, g.upper);
       setD(e.lid, g.upper);
       setD(e.lower, g.lower);
+      setD(e.water, g.lower);
       setD(e.crease, g.crease);
       setD(e.bag, g.bag);
       setD(e.lash, g.lash);
@@ -518,7 +603,22 @@
     el.teeth.setAttribute('d', `M ${f(Lx + 18)} ${f(uY - 3)} L ${f(Rx - 18)} ${f(uY - 3)} L ${f(Rx - 22)} ${f(uY + th)} L ${f(Lx + 22)} ${f(uY + th)} Z`);
     el.tongue.setAttribute('cy', f(lY - 2));
     el.tongue.setAttribute('ry', f(open * 11));
-    el.lipHighlight.setAttribute('cy', f(lY + (bot - lY) * 0.47));
+    const hlY = lY + (bot - lY) * 0.47;
+    el.lipHighlight.setAttribute('cy', f(hlY));
+    el.lipSpark.setAttribute('cx', f(470 + specX * 0.5));
+    el.lipSpark.setAttribute('cy', f(hlY - 1.5));
+    el.lipHighlight.setAttribute('cx', f(478 + specX * 0.5));
+    // ridules verticales de la lèvre inférieure
+    let cr = '';
+    for (const x of [462, 474, 487, 500, 513, 526, 538]) {
+      const y0 = lY + 5, y1 = lY + (bot - lY) * (0.55 + (x % 3) * 0.08);
+      cr += `M ${x} ${f(y0)} Q ${f(x + 1.5)} ${f((y0 + y1) / 2)} ${f(x + 0.5)} ${f(y1)} `;
+    }
+    el.lipCreases.setAttribute('d', cr);
+    // séparations des dents (visibles bouche ouverte)
+    let tl = '';
+    for (const x of [462, 481, 500, 519, 538]) tl += `M ${x} ${f(uY - 3)} L ${f(x - 0.5)} ${f(uY + th)} `;
+    el.teethLines.setAttribute('d', open > 0.04 ? tl : '');
     const hy = (top + uY) / 2;
     el.upperLipHl.setAttribute('d', `M 489 ${f(hy - 1)} Q 500 ${f(hy + 2)} 511 ${f(hy - 1)}`);
     el.lowerLipShade.setAttribute('d', `M ${f(Lx + 24)} ${f(lY + 4)} C 470 ${f(lY + 8)} 530 ${f(lY + 8)} ${f(Rx - 24)} ${f(lY + 4)}`);
@@ -662,6 +762,30 @@
 
     for (const L of zLayers) L.n.setAttribute('transform', mstr(layer(L.z, yaw, pitch)));
 
+    // reflets : la lumière vient d'en haut à gauche et ne bouge pas → les reflets glissent
+    const sYaw = Math.sin(yaw), sPitch = Math.sin(pitch);
+    specX = -12 * sYaw;
+    for (const sp of specs) sp.n.setAttribute('transform', `translate(${f(sp.sx * sYaw)} ${f(sp.sy * sPitch)})`);
+
+    // étoile de scintillement
+    if (now > twinkle.next) {
+      const [tx, ty] = TWINKLE_SPOTS[Math.floor(Math.random() * TWINKLE_SPOTS.length)];
+      Object.assign(twinkle, { start: now, next: now + 4 + Math.random() * 5, x: tx, y: ty });
+    }
+    const tp = (now - twinkle.start) / 0.65;
+    el.twinkle.setAttribute('transform', tp >= 0 && tp <= 1
+      ? `translate(${twinkle.x} ${twinkle.y}) rotate(${f(tp * 60)}) scale(${f(Math.sin(Math.PI * tp) * 0.95)})`
+      : 'scale(0)');
+
+    // poussières qui flottent lentement vers le haut
+    for (const m of motes) {
+      const t = reduceMotion ? 0 : now;
+      let y = (m.y0 - t * m.v) % 1040;
+      if (y < -20) y += 1040;
+      m.c.setAttribute('cx', f(m.x0 + m.amp * Math.sin(t * m.w + m.ph)));
+      m.c.setAttribute('cy', f(y));
+    }
+
     // oreilles : celle du côté visible s'élargit, l'autre passe derrière la joue
     const sy = Math.sin(yaw);
     const sL = clamp(sy > 0 ? 1 + 0.6 * sy : 1 + 1.7 * sy, 0.06, 1.4);
@@ -684,7 +808,10 @@
     const rig = `translate(0 ${f(gTy)}) translate(500 501) scale(${gSx.toFixed(4)} ${gSy.toFixed(4)}) translate(-500 -501)`;
     for (const g of el.rigs) g.setAttribute('transform', rig);
     for (const c of el.lensClips) c.setAttribute('transform', c.classList.contains('mirror') ? `${rig} matrix(-1 0 0 1 1000 0)` : rig);
-    for (const sh of el.lensShadows) sh.setAttribute('opacity', f(0.3 * (1 - gd)));
+    // ombre des verres sur les joues : celle du côté qui sort du visage s'efface en 3/4
+    const sy2 = Math.sin(yaw);
+    el.lensShadows[0].setAttribute('opacity', f(0.3 * (1 - gd) * clamp(1 + sy2 * 2.4, 0, 1)));
+    el.lensShadows[1].setAttribute('opacity', f(0.3 * (1 - gd) * clamp(1 - sy2 * 2.4, 0, 1)));
     // yeux vus à travers les verres : décalage de parallaxe entre z=85 (yeux) et z=120 (verres)
     el.eyeGhost.setAttribute('transform', `translate(${f(-35 * Math.tan(yaw))} ${f(35 * Math.tan(pitch))})`);
 
